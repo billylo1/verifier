@@ -1,0 +1,212 @@
+<html>
+
+<head>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.3/howler.min.js"></script>
+    <script type="text/javascript" src="https://unpkg.com/@zxing/browser@latest"></script>
+    <script type="text/javascript">
+        let count;
+        let verifiedSound, failedSound;
+
+        function iOS() {
+                return [
+                    'iPad Simulator',
+                    'iPhone Simulator',
+                    'iPod Simulator',
+                    'iPad',
+                    'iPhone',
+                    'iPod'
+                ].includes(navigator.platform)
+                    // iPad on iOS 13 detection
+                    || (navigator.userAgent.includes("Mac") && "ontouchend" in document)
+            }
+
+        function initializeSound() {
+            console.log('initializeSound');
+            verifiedSound = new Howl({
+                src: ['verified.mp3'], html5: true
+            });
+            failedSound = new Howl({
+                src: ['failed.mp3'], html5: true
+            });
+            verifiedSound.play();
+            document.getElementById('sound-switch').hidden = true;
+        }
+    
+        window.addEventListener('load', async () => {
+
+            count = 0;
+
+            if (iOS()) {
+                document.getElementById('sound-switch').hidden = false;
+            } else {
+                initializeSound();
+            }
+
+            const codeReader = new ZXingBrowser.BrowserQRCodeReader();
+
+            const videoInputDevices = await ZXingBrowser.BrowserCodeReader.listVideoInputDevices();
+
+            let selectedDevice = videoInputDevices[0];
+
+            for (const device of videoInputDevices) {
+                if (device.label.toLowerCase().includes('back')) {
+                    selectedDevice = device;
+                }
+            }
+
+            console.log(`Started decodeFromVideoDevice from ${selectedDevice.label}`);
+
+            const previewElem = document.querySelector('#test-area-qr-code-webcam > video');
+            const resultElement = document.querySelector('#result');
+
+            // you can use the controls to stop() the scan or switchTorch() if available
+            const controls = await codeReader.decodeFromVideoDevice(selectedDevice.deviceId, previewElem, async (result, error, controls) =>  {
+                count++;
+
+                if (result != undefined) {
+                    let valid = false;
+                    const resultText = result.text;
+                    console.log(resultText);
+                    if (resultText.includes('serialNumber')) {                      //  && resultText.includes('verifier.vaccine-ontario.ca')
+                        const verifyUrl = resultText + '&responseType=json';
+                        const verifyResponse = await fetch(verifyUrl);
+                        const verifyResponseJson = await verifyResponse.json();
+                        console.log(verifyResponseJson);
+                        if (verifyResponseJson.result == 'valid') {
+                            valid = true;
+                        }
+                    }
+
+                    if (valid) {
+                        resultElement.innerText = "Verified - #" + count;
+                        resultElement.className = 'verified';
+                        if (verifiedSound != undefined) 
+                            verifiedSound.play();
+                    } else {
+                        resultElement.innerText = "Not valid - #" + count;
+                        resultElement.className = 'notvalid';
+                        if (failedSound != undefined)
+                            failedSound.play();
+                    }
+                } else if (resultElement.innerText.length == 0) {
+                    resultElement.innerText = 'Ready to Scan';
+                }
+            });
+        });
+    </script>
+
+
+    <style>
+        .center {
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+            width: auto;
+            text-align: center;
+
+        }
+
+        .verified {
+            background-color: green;
+            height: 100%;
+            font-size: 72px;
+            text-align: center;
+            display: grid;
+            place-items: center;
+        }
+
+        .notvalid {
+            background-color: red;
+            height: 100%;
+            font-size: 72px;
+            text-align: center;
+            display: grid;
+            place-items: center;
+        }
+
+        .neutral {
+            background-color: blue;
+            height: 100%;
+            font-size: 72px;
+            text-align: center;
+            display: grid;
+            place-items: center;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            color: white;
+        }
+
+        .header {
+            background-color: blue;
+            padding: 12px;
+            vertical-align: middle;
+            font-size: 72px;
+            height: 6%;
+        }
+
+        .main {
+            height: 88%;
+        }
+        .footer {
+            font-size: 48px;
+            height: 6%;
+            padding: 10px;
+            color: blue
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class='header'>
+        <a href='https://grassroots.vaccine-ontario.ca'>
+        <img src='logo.webp' height='100' width='100' style="vertical-align: bottom;"></a>&nbsp;
+        Vax QR code Scanner
+    </div>
+
+    <div id='test-area-qr-code-webcam' class='main'>
+        <video id="preview" style='width:100%;height:92%'></video>
+        <div style='width:100%;height:8%'>
+            <td><div id="result" class='neutral'></div></td>            
+        </div>
+    </div>
+
+    <div class='center footer'>
+        <a href='mailto:grassroots@vaccine-ontario.ca'>Email</a>&nbsp;&nbsp;
+        <a href='https://twitter.com/grassroots_team'>@grassroot_team</a>&nbsp;&nbsp;
+        <a href='javascript:initializeSound()' id='sound-switch'>Enable Sound</a>
+    </div>
+
+</body>
+<!--
+
+      "resultPoints": [
+    {
+      "x": 109,
+      "y": 215,
+      "estimatedModuleSize": 2.857142857142857,
+      "count": 2
+    },
+    {
+      "x": 110.5,
+      "y": 72.5,
+      "estimatedModuleSize": 2.714285714285714,
+      "count": 3
+    },
+    {
+      "x": 252,
+      "y": 79,
+      "estimatedModuleSize": 2.7857142857142856,
+      "count": 2
+    },
+    {
+      "x": 240,
+      "y": 210,
+      "estimatedModuleSize": 2.6666666666666665
+    }
+  ],
+
+-->
+</html>

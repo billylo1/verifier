@@ -1,0 +1,17 @@
+<html>
+
+<head>
+    <script>
+        let url = location.href;
+        if (url.includes('serialNumber'))
+            location.href = url.replace('.ca/?','.ca/verify?');
+        else
+            location.href = '/camera.html';
+    </script>
+</head>
+
+<body>
+
+</body>
+
+</html>
