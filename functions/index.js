@@ -48,6 +48,8 @@ exports.register = functions.https.onRequest((request, response) => {
     });
 });
 
+
+
 exports.registerv2 = functions.https.onRequest((request, response) => {
     cors(request, response, async (err) => {
 
@@ -91,6 +93,16 @@ exports.registerv2 = functions.https.onRequest((request, response) => {
 
     });
 });
+
+function servePage(fileName, res) {
+    fs.readFile(fileName, 'utf8', function (err, data) {
+        if (err) {
+            return console.log(err)
+        }
+        res.send(data)
+    })
+}
+
 
 exports.verify = functions.https.onRequest((request, response) => {
     cors(request, response, async (err) => {
@@ -139,7 +151,7 @@ exports.verify = functions.https.onRequest((request, response) => {
                             response.send({ result: 'valid' });
                         } else {
                             console.log(`verified ${key} - native`);
-                            response.redirect('/valid.html');
+                            response.sendFile('valid.html');
                         }
                         return;
                     }
@@ -151,7 +163,7 @@ exports.verify = functions.https.onRequest((request, response) => {
             if (request.query.responseType == 'json') {
                 response.send({ result: 'notfound' });
             } else {
-                response.redirect('/notfound.html');
+                response.sendFile('notfound.html', { root: __dirname });
             }
             return;
 
