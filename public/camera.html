@@ -19,7 +19,7 @@
                     // iPad on iOS 13 detection
                     || (navigator.userAgent.includes("Mac") && "ontouchend" in document)
             }
-
+        
         function initializeSound() {
             console.log('initializeSound');
             verifiedSound = new Howl({
@@ -47,7 +47,45 @@
             const videoInputDevices = await ZXingBrowser.BrowserCodeReader.listVideoInputDevices();
 
             let selectedDevice = videoInputDevices[0];
+            async function switchCamera(){
+                if(selectedDevice == videoInputDevices[0]){
+                    selectedDevice = videoInputDevices[1]
+                } else{
+                    selectedDevice = videoInputDevices[0]
+                }
+                controls = await codeReader.decodeFromVideoDevice(selectedDevice.deviceId, previewElem, async (result, error, controls) =>  {
+                    count++;
 
+                    if (result != undefined) {
+                        let valid = false;
+                        const resultText = result.text;
+                        console.log(resultText);
+                        if (resultText.includes('serialNumber')) {                      //  && resultText.includes('verifier.vaccine-ontario.ca')
+                            const verifyUrl = resultText + '&responseType=json';
+                            const verifyResponse = await fetch(verifyUrl);
+                            const verifyResponseJson = await verifyResponse.json();
+                            console.log(verifyResponseJson);
+                            if (verifyResponseJson.result == 'valid') {
+                                valid = true;
+                            }
+                        }
+
+                        if (valid) {
+                            resultElement.innerText = "Verified - #" + count;
+                            resultElement.className = 'verified';
+                            if (verifiedSound != undefined) 
+                                verifiedSound.play();
+                        } else {
+                            resultElement.innerText = "Not valid - #" + count;
+                            resultElement.className = 'notvalid';
+                            if (failedSound != undefined)
+                                failedSound.play();
+                        }
+                    } else if (resultElement.innerText.length == 0) {
+                        resultElement.innerText = 'Ready to Scan';
+                    }
+                });
+            }
             for (const device of videoInputDevices) {
                 if (device.label.toLowerCase().includes('back')) {
                     selectedDevice = device;
@@ -58,9 +96,13 @@
 
             const previewElem = document.querySelector('#test-area-qr-code-webcam > video');
             const resultElement = document.querySelector('#result');
-
+            previewElem.addEventListener('click', function (e) {
+                if(videoInputDevices[1]){
+                    switchCamera()
+                }
+            });
             // you can use the controls to stop() the scan or switchTorch() if available
-            const controls = await codeReader.decodeFromVideoDevice(selectedDevice.deviceId, previewElem, async (result, error, controls) =>  {
+            let controls = await codeReader.decodeFromVideoDevice(selectedDevice.deviceId, previewElem, async (result, error, controls) =>  {
                 count++;
 
                 if (result != undefined) {
