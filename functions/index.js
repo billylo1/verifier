@@ -151,7 +151,7 @@ exports.verify = functions.https.onRequest((request, response) => {
                             response.send({ result: 'valid' });
                         } else {
                             console.log(`verified ${key} - native`);
-                            response.sendFile('valid.html');
+                            response.sendFile('valid.html', { root: __dirname });
                         }
                         return;
                     }
