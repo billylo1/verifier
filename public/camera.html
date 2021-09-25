@@ -57,11 +57,6 @@
 
                 selectedDevice = videoInputDevices[cameraCounter]
 
-                if(selectedDevice == videoInputDevices[0]){
-                    selectedDevice = videoInputDevices[1]
-                } else{
-                    selectedDevice = videoInputDevices[0]
-                }
                 controls = await codeReader.decodeFromVideoDevice(selectedDevice.deviceId, previewElem, async (result, error, controls) =>  {
                     count++;
 
@@ -95,11 +90,11 @@
                     }
                 });
             }
-            for (const device of videoInputDevices) {
+/*             for (const device of videoInputDevices) {
                 if (device.label.toLowerCase().includes('back')) {
                     selectedDevice = device;
                 }
-            }
+            } */
 
             console.log(`Started decodeFromVideoDevice from ${selectedDevice.label}`);
 
