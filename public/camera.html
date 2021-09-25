@@ -33,7 +33,7 @@
         }
     
         window.addEventListener('load', async () => {
-
+            let cameraCounter = 0;
             count = 0;
 
             if (iOS()) {
@@ -48,6 +48,15 @@
 
             let selectedDevice = videoInputDevices[0];
             async function switchCamera(){
+                console.log(cameraCounter)
+                if(videoInputDevices[cameraCounter+1]){
+                    cameraCounter +=1
+                } else{
+                    cameraCounter = 0
+                }
+
+                selectedDevice = videoInputDevices[cameraCounter]
+
                 if(selectedDevice == videoInputDevices[0]){
                     selectedDevice = videoInputDevices[1]
                 } else{
