@@ -71,12 +71,12 @@
                         }
 
                         if (valid) {
-                            resultElement.innerText = "Verified - #" + count;
+                            resultElement.innerText = "Verified";
                             resultElement.className = 'verified';
                             if (verifiedSound != undefined) 
                                 verifiedSound.play();
                         } else {
-                            resultElement.innerText = "Not valid - #" + count;
+                            resultElement.innerText = "Invalid";
                             resultElement.className = 'notvalid';
                             if (failedSound != undefined)
                                 failedSound.play();
@@ -120,12 +120,12 @@
                     }
 
                     if (valid) {
-                        resultElement.innerText = "Verified - #" + count;
+                        resultElement.innerText = "Verified";
                         resultElement.className = 'verified';
                         if (verifiedSound != undefined) 
                             verifiedSound.play();
                     } else {
-                        resultElement.innerText = "Not valid - #" + count;
+                        resultElement.innerText = "Invalid";
                         resultElement.className = 'notvalid';
                         if (failedSound != undefined)
                             failedSound.play();
