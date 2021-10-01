@@ -33,7 +33,7 @@
         }
     
         window.addEventListener('load', async () => {
-
+            let cameraCounter = 0;
             count = 0;
 
             if (iOS()) {
@@ -48,11 +48,15 @@
 
             let selectedDevice = videoInputDevices[0];
             async function switchCamera(){
-                if(selectedDevice == videoInputDevices[0]){
-                    selectedDevice = videoInputDevices[1]
+                console.log(cameraCounter)
+                if(videoInputDevices[cameraCounter+1]){
+                    cameraCounter +=1
                 } else{
-                    selectedDevice = videoInputDevices[0]
+                    cameraCounter = 0
                 }
+
+                selectedDevice = videoInputDevices[cameraCounter]
+
                 controls = await codeReader.decodeFromVideoDevice(selectedDevice.deviceId, previewElem, async (result, error, controls) =>  {
                     count++;
 
@@ -86,11 +90,11 @@
                     }
                 });
             }
-            for (const device of videoInputDevices) {
+/*             for (const device of videoInputDevices) {
                 if (device.label.toLowerCase().includes('back')) {
                     selectedDevice = device;
                 }
-            }
+            } */
 
             console.log(`Started decodeFromVideoDevice from ${selectedDevice.label}`);
 
